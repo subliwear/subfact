@@ -1,0 +1,61 @@
+services:
+  # Backend Laravel API
+  fastkart-api:
+    build:
+      context: ./fastkart-api  # Répertoire du backend Laravel
+      dockerfile: Dockerfile
+    container_name: fastkart-backend
+    ports:
+      - "8000:8000"
+    volumes:
+      - ./fastkart-api:/var/www
+    environment:
+      # Variables pour la configuration Laravel
+      - APP_ENV=production
+      - APP_KEY=base64:some-key
+      - APP_DEBUG=false
+      - APP_URL=http://localhost:8000
+    depends_on:
+      - db
+
+  # Admin Interface (React.js)
+  nextjs-admin:
+    build:
+      context: ./nextjs-fastkart-admin  # Répertoire de l'interface admin Next.js
+      dockerfile: Dockerfile
+    container_name: fastkart-admin
+    ports:
+      - "3000:3000"
+    volumes:
+      - ./nextjs-fastkart-admin:/app
+    environment:
+      - NODE_ENV=production  # Assurer que l'environnement est en production
+
+  # Client Interface (React.js)
+  nextjs-frontend:
+    build:
+      context: ./nextjs-fastkart-frontend  # Répertoire de l'interface frontend Next.js
+      dockerfile: Dockerfile
+    container_name: fastkart-frontend
+    ports:
+      - "3001:3001"
+    volumes:
+      - ./nextjs-fastkart-frontend:/app
+    environment:
+      - NODE_ENV=production  # Assurer que l'environnement est en production
+
+  # Base de données (MySQL)
+  db:
+    image: mysql:8.0  # Utiliser MySQL 8.0 compatible ARM
+    container_name: fastkart-db
+    platform: linux/amd64  # Forcer l'architecture amd64
+    environment:
+      MYSQL_ROOT_PASSWORD:  # Laisser le mot de passe root vide
+      MYSQL_DATABASE: SubliFactory  # Nom de la base de données
+    ports:
+      - "3306:3306"
+    volumes:
+      - db_data:/var/lib/mysql
+
+volumes:
+  db_data:
